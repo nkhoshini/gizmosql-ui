@@ -6,7 +6,6 @@ import { NotebookView } from './components/NotebookView';
 import { ResultSchema } from './components/ResultSchema';
 import { AddServerDialog } from './components/AddServerDialog';
 import { TableDetails } from './components/TableDetails';
-import { Cell } from './types';
 import gizmosqlLogo from './assets/gizmosql-logo.png';
 import './App.css';
 

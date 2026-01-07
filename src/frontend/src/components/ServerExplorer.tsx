@@ -273,17 +273,19 @@ export function ServerExplorer({ onAddServer, onTableSelect }: ServerExplorerPro
                   <Server className="node-icon-svg icon-server" size={16} />
                   {/* TLS status icon */}
                   {server.useTls ? (
-                    <Lock
-                      className={`tls-icon ${server.skipTlsVerify ? 'tls-warning' : 'tls-secure'}`}
-                      size={12}
-                      title={server.skipTlsVerify ? 'TLS enabled (certificate not verified)' : 'TLS enabled (certificate verified)'}
-                    />
+                    <span title={server.skipTlsVerify ? 'TLS enabled (certificate not verified)' : 'TLS enabled (certificate verified)'}>
+                      <Lock
+                        className={`tls-icon ${server.skipTlsVerify ? 'tls-warning' : 'tls-secure'}`}
+                        size={12}
+                      />
+                    </span>
                   ) : (
-                    <LockOpen
-                      className="tls-icon tls-insecure"
-                      size={12}
-                      title="Connection is not encrypted (insecure)"
-                    />
+                    <span title="Connection is not encrypted (insecure)">
+                      <LockOpen
+                        className="tls-icon tls-insecure"
+                        size={12}
+                      />
+                    </span>
                   )}
                   <span className="server-status-dot" data-status={server.status}></span>
                   <span className="server-name">{server.name}</span>
