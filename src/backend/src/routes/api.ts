@@ -79,6 +79,28 @@ apiRouter.post('/disconnect', async (req: Request, res: Response) => {
   }
 });
 
+// Check if SQL statement can be paginated (only SELECT-like queries)
+function canPaginate(sql: string): boolean {
+  // Normalize: trim whitespace and remove leading comments
+  let normalized = sql.trim();
+
+  // Remove block comments /* ... */
+  normalized = normalized.replace(/\/\*[\s\S]*?\*\//g, '');
+  // Remove line comments -- ...
+  normalized = normalized.replace(/--[^\n]*/g, '');
+  // Trim again after removing comments
+  normalized = normalized.trim();
+
+  // Get the first keyword (case-insensitive)
+  const firstWord = normalized.split(/\s+/)[0]?.toUpperCase() || '';
+
+  // Only SELECT, WITH (CTE), TABLE, and VALUES can be paginated
+  // Note: EXPLAIN could return rows but wrapping it would change semantics
+  const paginatableKeywords = ['SELECT', 'WITH', 'TABLE', 'VALUES'];
+
+  return paginatableKeywords.includes(firstWord);
+}
+
 // Execute SQL query with optional pagination
 apiRouter.post('/query', async (req: Request, res: Response) => {
   try {
@@ -100,26 +122,35 @@ apiRouter.post('/query', async (req: Request, res: Response) => {
       return;
     }
 
-    // Apply pagination by wrapping the query
-    const pageLimit = typeof limit === 'number' ? limit : 1000; // Default page size
-    const pageOffset = typeof offset === 'number' ? offset : 0;
+    // Only apply pagination to SELECT-like queries
+    if (canPaginate(sql)) {
+      const pageLimit = typeof limit === 'number' ? limit : 1000; // Default page size
+      const pageOffset = typeof offset === 'number' ? offset : 0;
 
-    // Request one extra row to detect if there are more results
-    const paginatedSql = `SELECT * FROM (${sql.replace(/;+\s*$/, '')}) AS __paginated_query LIMIT ${pageLimit + 1} OFFSET ${pageOffset}`;
+      // Request one extra row to detect if there are more results
+      const paginatedSql = `SELECT * FROM (${sql.replace(/;+\s*$/, '')}) AS __paginated_query LIMIT ${pageLimit + 1} OFFSET ${pageOffset}`;
 
-    const result = await service.execute(paginatedSql);
+      const result = await service.execute(paginatedSql);
 
-    // Check if there are more results
-    const hasMore = result.rows.length > pageLimit;
-    if (hasMore) {
-      result.rows = result.rows.slice(0, pageLimit);
-      result.rowCount = pageLimit;
+      // Check if there are more results
+      const hasMore = result.rows.length > pageLimit;
+      if (hasMore) {
+        result.rows = result.rows.slice(0, pageLimit);
+        result.rowCount = pageLimit;
+      }
+
+      res.json({
+        ...result,
+        hasMore,
+      });
+    } else {
+      // DDL, DML, and other non-SELECT statements: execute directly without pagination
+      const result = await service.execute(sql);
+      res.json({
+        ...result,
+        hasMore: false,
+      });
     }
-
-    res.json({
-      ...result,
-      hasMore,
-    });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Query execution failed';
     res.status(500).json({ error: message });
