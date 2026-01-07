@@ -11,9 +11,16 @@ A web-based SQL interface for GizmoSQL servers. GizmoSQL UI provides a modern, r
 
 ## Quick Start
 
+### macOS (Homebrew)
+
+```bash
+brew install gizmodata/tap/gizmosql-ui
+gizmosql-ui
+```
+
 ### Using Pre-built Executable
 
-Download the appropriate executable for your platform from the releases page, then run:
+Download the appropriate executable for your platform from the [releases page](https://github.com/gizmodata/gizmosql-ui/releases), then run:
 
 ```bash
 ./gizmosql-ui

@@ -26,6 +26,9 @@ export function Cell({ notebookId, cell, isActive, onActivate, onAddCellBelow, o
   const executeRef = useRef<() => void>(() => {});
 
   const handleExecute = useCallback(() => {
+    // Auto-activate this cell when executing so right pane updates
+    onActivate();
+
     console.log('Executing cell:', cell.id, 'serverId:', cell.serverId, 'servers:', state.servers.length);
     console.log('onRequestConnection available:', !!onRequestConnection);
 
@@ -70,7 +73,7 @@ export function Cell({ notebookId, cell, isActive, onActivate, onAddCellBelow, o
     }
 
     executeCell(notebookId, cell.id);
-  }, [executeCell, notebookId, cell.id, cell.serverId, state.servers, updateCellServer, onRequestConnection]);
+  }, [executeCell, notebookId, cell.id, cell.serverId, state.servers, updateCellServer, onRequestConnection, onActivate]);
 
   const handleServerSelect = (serverId: string) => {
     updateCellServer(notebookId, cell.id, serverId);

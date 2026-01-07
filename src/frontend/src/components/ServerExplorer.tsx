@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { useApp } from '../context/AppContext';
 import { ServerConnection } from '../types';
 import { VscFolder, VscTable, VscEye } from 'react-icons/vsc';
-import { Database, Server } from 'lucide-react';
+import { Database, Server, Lock, LockOpen } from 'lucide-react';
 import './ServerExplorer.css';
 
 interface TreeNode {
@@ -271,6 +271,20 @@ export function ServerExplorer({ onAddServer, onTableSelect }: ServerExplorerPro
                     {isLoading ? <span className="loading-spinner">⟳</span> : '▶'}
                   </span>
                   <Server className="node-icon-svg icon-server" size={16} />
+                  {/* TLS status icon */}
+                  {server.useTls ? (
+                    <Lock
+                      className={`tls-icon ${server.skipTlsVerify ? 'tls-warning' : 'tls-secure'}`}
+                      size={12}
+                      title={server.skipTlsVerify ? 'TLS enabled (certificate not verified)' : 'TLS enabled (certificate verified)'}
+                    />
+                  ) : (
+                    <LockOpen
+                      className="tls-icon tls-insecure"
+                      size={12}
+                      title="Connection is not encrypted (insecure)"
+                    />
+                  )}
                   <span className="server-status-dot" data-status={server.status}></span>
                   <span className="server-name">{server.name}</span>
                   <button

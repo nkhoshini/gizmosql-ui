@@ -155,6 +155,24 @@
   color: var(--primary-color);
 }
 
+/* TLS status icons */
+.tls-icon {
+  flex-shrink: 0;
+  margin-left: -2px;
+}
+
+.tls-secure {
+  color: #22c55e; /* green */
+}
+
+.tls-warning {
+  color: #eab308; /* yellow */
+}
+
+.tls-insecure {
+  color: #ef4444; /* red */
+}
+
 .icon-catalog {
   color: #f59e0b;
 }

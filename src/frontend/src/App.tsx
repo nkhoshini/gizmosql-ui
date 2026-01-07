@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { NotebookExplorer } from './components/NotebookExplorer';
 import { ServerExplorer } from './components/ServerExplorer';
@@ -20,12 +20,19 @@ interface SelectedTable {
 function AppContent() {
   const { state, toggleTheme, updateCellServer, executeCell } = useApp();
   const [showAddServer, setShowAddServer] = useState(false);
-  const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
+  const [selectedCellId, setSelectedCellId] = useState<string | null>(null);
   const [selectedTable, setSelectedTable] = useState<SelectedTable | null>(null);
   const [leftSidebarWidth, setLeftSidebarWidth] = useState(260);
   const [rightSidebarWidth, setRightSidebarWidth] = useState(280);
   const [tableDetailsHeight, setTableDetailsHeight] = useState(280);
   const [pendingExecuteCellId, setPendingExecuteCellId] = useState<string | null>(null);
+
+  // Derive selected cell from state so it updates when cell result changes
+  const selectedCell = useMemo(() => {
+    if (!selectedCellId) return null;
+    const activeNotebook = state.notebooks.find(n => n.id === state.activeNotebookId);
+    return activeNotebook?.cells.find(c => c.id === selectedCellId) || null;
+  }, [selectedCellId, state.notebooks, state.activeNotebookId]);
 
   const handleTableSelect = useCallback((serverId: string, catalog: string, schema: string, tableName: string) => {
     console.log('Table selected:', serverId, catalog, schema, tableName);
@@ -183,7 +190,7 @@ function AppContent() {
 
         {/* Main area */}
         <main className="main-content">
-          <NotebookView onCellSelect={setSelectedCell} onRequestConnection={handleRequestConnection} />
+          <NotebookView onCellSelect={(cell) => setSelectedCellId(cell?.id || null)} onRequestConnection={handleRequestConnection} />
         </main>
 
         {/* Right sidebar */}
