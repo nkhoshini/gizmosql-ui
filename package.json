@@ -1,0 +1,50 @@
+{
+  "name": "gizmosql-ui",
+  "version": "1.0.0",
+  "description": "GizmoSQL UI - A web-based SQL interface for GizmoSQL servers",
+  "type": "module",
+  "main": "dist/backend/src/index.js",
+  "bin": {
+    "gizmosql-ui": "./dist/backend/src/index.js"
+  },
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd src/backend && npm run dev",
+    "dev:frontend": "cd src/frontend && npm run dev",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "cd src/frontend && npm run build",
+    "build:backend": "cd src/backend && npm run build",
+    "start": "node dist/backend/src/index.js",
+    "package": "npm run build && npx @yao-pkg/pkg . --targets node20-macos-arm64,node20-macos-x64,node20-linux-x64,node20-win-x64 --output dist/gizmosql-ui",
+    "package:macos": "npm run build && npx @yao-pkg/pkg . --targets node20-macos-arm64 --output dist/gizmosql-ui-macos-arm64",
+    "clean": "rm -rf dist node_modules src/frontend/node_modules src/backend/node_modules"
+  },
+  "pkg": {
+    "scripts": "dist/backend/src/**/*.js",
+    "assets": [
+      "dist/frontend/**/*"
+    ],
+    "outputPath": "dist"
+  },
+  "keywords": [
+    "gizmosql",
+    "gizmodata",
+    "sql",
+    "ui",
+    "database",
+    "arrow",
+    "flight"
+  ],
+  "author": "GizmoData LLC",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@gizmodata/gizmosql-client": "^1.2.10",
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "open": "^10.1.0"
+  },
+  "devDependencies": {
+    "@yao-pkg/pkg": "^6.0.0",
+    "concurrently": "^9.1.0"
+  }
+}
