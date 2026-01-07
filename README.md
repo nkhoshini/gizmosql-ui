@@ -1,6 +1,6 @@
 # GizmoSQL UI
 
-A web-based SQL interface for GizmoSQL servers. GizmoSQL UI provides a modern, responsive interface for connecting to and querying GizmoSQL databases using Apache Arrow Flight SQL.
+A web-based SQL interface for [GizmoSQL](https://github.com/gizmodata/gizmosql) servers. GizmoSQL UI provides a modern, responsive interface for connecting to and querying GizmoSQL databases using Apache Arrow Flight SQL.
 
 ## Features
 
@@ -27,6 +27,33 @@ Download the appropriate executable for your platform from the [releases page](h
 ```
 
 The UI will automatically open in your default browser at `http://localhost:4821`.
+
+### Starting a GizmoSQL Server (Optional)
+
+If you don't have a GizmoSQL server running, you can start one using Docker:
+
+```bash
+docker run --name gizmosql \
+           --detach \
+           --rm \
+           --tty \
+           --init \
+           --publish 31337:31337 \
+           --env TLS_ENABLED="1" \
+           --env GIZMOSQL_USERNAME=gizmosql \
+           --env GIZMOSQL_PASSWORD="gizmosql_password" \
+           --env PRINT_QUERIES="1" \
+           --pull always \
+           gizmodata/gizmosql:latest
+```
+
+Then connect GizmoSQL UI using:
+- Host: `localhost`
+- Port: `31337`
+- Username: `gizmosql`
+- Password: `gizmosql_password`
+- Use TLS: enabled
+- Skip TLS Verify: enabled (for self-signed certificate)
 
 ### Building from Source
 
