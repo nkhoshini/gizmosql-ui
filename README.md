@@ -16,7 +16,7 @@ A web-based SQL interface for [GizmoSQL](https://github.com/gizmodata/gizmosql) 
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js 22+
 - pnpm 9+
 
 ### Development
@@ -48,20 +48,14 @@ You can package the app into standalone executables for Linux, macOS, and Window
 ```bash
 # Build executables for all platforms
 pnpm package
-
-# Build for specific platforms
-pnpm package:linux      # Linux x64
-pnpm package:macos      # macOS ARM64 (Apple Silicon)
-pnpm package:macos-x64  # macOS x64 (Intel)
-pnpm package:win        # Windows x64
 ```
 
-The executables will be created in `dist/bin/`. Run them directly:
+The executables will be created in `dist/`. Run them directly:
 
 ```bash
-./dist/bin/gizmosql-ui-macos-arm64   # macOS
-./dist/bin/gizmosql-ui-linux-x64     # Linux
-dist\bin\gizmosql-ui-win-x64.exe     # Windows
+./dist/gizmosql-ui-macos-arm64   # macOS
+./dist/gizmosql-ui-linux-x64     # Linux
+dist\gizmosql-ui-win-x64.exe     # Windows
 ```
 
 The executable will start the server and automatically open your browser to `http://localhost:4821`.
