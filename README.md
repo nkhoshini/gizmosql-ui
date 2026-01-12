@@ -14,12 +14,31 @@ A web-based SQL interface for [GizmoSQL](https://github.com/gizmodata/gizmosql) 
 
 ## Quick Start
 
-### Prerequisites
+### macOS (Homebrew)
+
+```bash
+brew install gizmodata/tap/gizmosql-ui
+gizmosql-ui
+```
+
+### Using Pre-built Executable
+The development server runs at http://localhost:3000
+
+Download the appropriate executable for your platform from the [releases page](https://github.com/gizmodata/gizmosql-ui/releases), then run:
+```bash
+./gizmosql-ui
+```
+
+The UI will automatically open in your default browser at `http://localhost:4821`.
+
+### Building from Source
+
+#### Prerequisites
 
 - Node.js 22+
 - pnpm 9+
 
-### Development
+#### Development
 
 ```bash
 # Install dependencies
@@ -31,7 +50,7 @@ pnpm dev
 
 The development server runs at http://localhost:3000
 
-### Production Build
+#### Production Build
 
 ```bash
 # Build for production
@@ -41,7 +60,7 @@ pnpm build
 pnpm start
 ```
 
-### Creating Standalone Executables
+#### Creating Standalone Executables
 
 You can package the app into standalone executables for Linux, macOS, and Windows:
 
