@@ -5,83 +5,25 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
-    name: Build & Package
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Lint
-        run: pnpm lint
-        continue-on-error: true
-
-      - name: Build Next.js
-        run: pnpm build
-
-      - name: Package binaries
-        run: pnpm package
-
-      - name: List build artifacts
-        run: |
-          echo "📦 Build artifacts:"
-          ls -lah dist/
-
-      - name: Upload Linux artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: gizmosql-ui-linux-x64
-          path: dist/gizmosql-ui-linux-x64
-          retention-days: 7
-          if-no-files-found: error
-
-      - name: Upload macOS ARM64 artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: gizmosql-ui-macos-arm64
-          path: dist/gizmosql-ui-macos-arm64
-          retention-days: 7
-          if-no-files-found: error
-
-      - name: Upload Windows artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: gizmosql-ui-win-x64
-          path: dist/gizmosql-ui-win-x64.exe
-          retention-days: 7
-          if-no-files-found: error
+    uses: ./.github/workflows/build.yml
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    with:
+      retention-days: 1
+      run-lint: true
 
   # Optional: Test the Linux binary actually runs
   test-binary:
@@ -96,12 +38,12 @@ jobs:
           name: gizmosql-ui-linux-x64
 
       - name: Make executable
-        run: chmod +x gizmosql-ui-linux-x64
+        run: chmod +x gizmosql-ui
 
       - name: Test binary starts
         run: |
           # Start the binary in background
-          timeout 10s ./gizmosql-ui-linux-x64 &
+          timeout 10s ./gizmosql-ui &
           PID=$!
           
           # Wait for server to be ready
