@@ -1,0 +1,87 @@
+name: Build
+
+on:
+  workflow_call:
+    inputs:
+      retention-days:
+        description: 'Number of days to retain artifacts'
+        required: false
+        default: 1
+        type: number
+      run-lint:
+        description: 'Whether to run linting'
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux
+            artifact: gizmosql-ui-linux-x64
+            build-output: dist/gizmosql-ui
+          - os: macos-latest
+            target: macos
+            artifact: gizmosql-ui-macos-arm64
+            build-output: dist/gizmosql-ui
+          - os: windows-latest
+            target: windows
+            artifact: gizmosql-ui-win-x64.exe
+            build-output: dist/gizmosql-ui.exe
+
+    name: Build (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        if: matrix.target != 'windows'
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Lint
+        if: ${{ inputs.run-lint }}
+        run: pnpm lint
+        continue-on-error: true
+
+      - name: Package binary for ${{ matrix.target }}
+        run: pnpm package:${{ matrix.target }}
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: ${{ matrix.build-output }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.build-output }}
+          retention-days: ${{ inputs.retention-days }}

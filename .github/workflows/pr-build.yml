@@ -1,0 +1,61 @@
+name: PR Build Test
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    with:
+      retention-days: 1
+      run-lint: true
+
+  # Optional: Test the Linux binary actually runs
+  test-binary:
+    name: Test Binary
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download Linux artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: gizmosql-ui-linux-x64
+
+      - name: Make executable
+        run: chmod +x gizmosql-ui
+
+      - name: Test binary starts
+        run: |
+          # Start the binary in background
+          timeout 10s ./gizmosql-ui &
+          PID=$!
+          
+          # Wait for server to be ready
+          sleep 5
+          
+          # Check if the server is responding
+          if curl -s http://localhost:3000 > /dev/null; then
+            echo "✅ Server started successfully"
+          else
+            echo "❌ Server failed to start"
+            exit 1
+          fi
+          
+          # Clean up
+          kill $PID 2>/dev/null || true
